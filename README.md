@@ -9,9 +9,14 @@ Built on Cloudflare Workers + D1, using [grammY](https://grammy.dev).
 
 ## Features
 
-- **Endless feed**: `/feed` or tap **Next** for another unseen fact; falls
-  back to your least-recently-seen fact once a topic is exhausted, so the
-  feed never dead-ends.
+- **Endless feed**: `/feed` or tap **▶️ Next** for another unseen fact;
+  falls back to your least-recently-seen fact once a topic is exhausted,
+  so the feed never dead-ends.
+- **Persistent menu**: a bottom keyboard bar (Next, Surprise me, Search,
+  Browse, Default topic, Me, Reset, Help) for every action that doesn't
+  need per-tap state. Category pickers, pagination, and admin pick-flows
+  stay inline keyboards — a reply-keyboard button can't carry a page
+  number or a search token, so those genuinely need to be.
 - **Category tree**: every category can have a parent (`general` is the
   default, top-level). Reading a parent category includes all its
   descendants.

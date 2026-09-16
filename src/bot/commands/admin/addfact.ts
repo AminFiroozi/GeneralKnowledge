@@ -3,6 +3,7 @@ import { browse } from "../../../services/categoryTree";
 import { browseKeyboard } from "../../keyboards/categoryPicker";
 
 export async function addFactCommand(ctx: AppContext): Promise<void> {
+  ctx.session.awaitingSearchQuery = false; // a stale 🔍 Search prompt shouldn't hijack the text step below
   ctx.session.flow = { kind: "addfact", step: "await_text" };
   await ctx.reply("Send the fact's text.");
 }

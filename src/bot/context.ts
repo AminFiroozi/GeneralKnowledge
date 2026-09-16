@@ -15,8 +15,11 @@ export type Flow =
 export interface SessionData {
   flow?: Flow;
   readingCategoryId?: number; // subtree currently being read via /next; undefined = user's default
-  lastFactMsgId?: number; // previous fact message, so its keyboard can be stripped
   exhaustedNotified?: boolean;
+  // Deliberately separate from `flow`: the 🔍 Search button's "send me a
+  // query" prompt must not clobber a pending addfact/movecat/editcat flow
+  // — /search mid-flow is meant to feed *that* flow's category pick.
+  awaitingSearchQuery?: boolean;
 }
 
 export type AppContext = Context &

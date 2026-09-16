@@ -31,6 +31,7 @@ export async function handleEditAction(ctx: AppContext, cb: Extract<Callback, { 
   }
 
   if (cb.action === "n") {
+    ctx.session.awaitingSearchQuery = false; // a stale 🔍 Search prompt shouldn't hijack the name below
     ctx.session.flow = { kind: "editcat", step: "await_name", categoryId: category.id };
     await ctx.editMessageText(`Send the new name for "${category.name}".`, { reply_markup: undefined });
     await ctx.answerCallbackQuery();

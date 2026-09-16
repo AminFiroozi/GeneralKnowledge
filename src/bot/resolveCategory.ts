@@ -16,11 +16,3 @@ export async function resolveReadingCategory(ctx: AppContext): Promise<Category>
   }
   return ctx.repos.categories.general();
 }
-
-/** catId to embed in the reader keyboard's "Next" button: 0 means "resolve
- * dynamically" (the user's session/default at tap time), used whenever the
- * category shown is exactly that dynamic resolution rather than an
- * explicit pick. */
-export function keyboardCatIdFor(ctx: AppContext): number {
-  return ctx.session.readingCategoryId ?? 0;
-}

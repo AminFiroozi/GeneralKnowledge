@@ -91,5 +91,5 @@ export async function handlePick(ctx: AppContext, cb: Extract<Callback, { op: "p
   ctx.session.exhaustedNotified = false;
   await ctx.editMessageText(`Reading: ${category.name}`, { reply_markup: undefined });
   await ctx.answerCallbackQuery();
-  await deliverFact(ctx, category, category.id);
+  await deliverFact(ctx, category);
 }
