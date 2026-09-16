@@ -4,6 +4,7 @@
 export type Purpose = "r" | "a" | "d" | "c" | "m" | "e";
 
 export type EditAction = "n" | "m"; // rename | change-parent
+export type ReviewDecision = "a" | "r"; // approve | reject
 
 export type Callback =
   | { op: "b"; purpose: Purpose; catId: number; page: number } // browse into catId (0 = root)
@@ -13,6 +14,7 @@ export type Callback =
   | { op: "n"; catId: number } // next fact (0 = user's default category)
   | { op: "r"; catId: number } // random/surprise-me within catId (0 = any)
   | { op: "e"; action: EditAction; catId: number } // /editcat menu action on catId
+  | { op: "v"; decision: ReviewDecision; pendingId: number } // admin approve/reject a pending change
   | { op: "x" } // cancel current flow
   | { op: "h" } // noop (e.g. page indicator button)
   | { op: "z" }; // confirm: clear this user's seen-facts history (/reset)

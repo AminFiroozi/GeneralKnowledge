@@ -26,6 +26,7 @@ import { editCategoryCommand, editCategoryTextHandler } from "./commands/admin/e
 import { delFactCommand } from "./commands/admin/delfact";
 import { statsCommand } from "./commands/admin/stats";
 import { importCommand } from "./commands/admin/import";
+import { pendingCommand } from "./commands/admin/pending";
 
 import { MAIN_MENU } from "./keyboards/mainMenu";
 import {
@@ -68,14 +69,18 @@ export function createBot(env: Env, execCtx: ExecutionContext): Bot<AppContext> 
   bot.command("me", meCommand);
   bot.command("reset", resetCommand);
 
-  // Admin commands
-  bot.command("addfact", adminOnly, addFactCommand);
-  bot.command("addcat", adminOnly, addCategoryCommand);
+  // Open to everyone: a non-admin's add/edit here goes to review instead
+  // of applying directly (see src/bot/review.ts).
+  bot.command("addfact", addFactCommand);
+  bot.command("addcat", addCategoryCommand);
+  bot.command("editcat", editCategoryCommand);
+
+  // Admin-only
   bot.command("movecat", adminOnly, moveCategoryCommand);
-  bot.command("editcat", adminOnly, editCategoryCommand);
   bot.command("delfact", adminOnly, delFactCommand);
   bot.command("stats", adminOnly, statsCommand);
   bot.command("import", adminOnly, importCommand);
+  bot.command("pending", adminOnly, pendingCommand);
 
   // Persistent reply-keyboard taps (mainMenu.ts). Registered before the
   // flow-continuation handlers below: a menu tap always supersedes a

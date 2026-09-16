@@ -4,14 +4,22 @@ import { deliverFact } from "../deliverFact";
 import { browse } from "../../services/categoryTree";
 import { browseKeyboard } from "../keyboards/categoryPicker";
 import { showEditMenu } from "./editcat";
+import { submitForReview } from "../review";
 
 async function handlePickC(ctx: AppContext, catId: number): Promise<void> {
   const flow = ctx.session.flow;
   const parentId = catId === 0 ? null : catId; // 0 is the "top level" sentinel
 
   if (flow?.kind === "addcat" && flow.step === "await_parent") {
-    const created = await ctx.repos.categories.create(parentId, flow.name);
     ctx.session.flow = undefined;
+    if (!ctx.isAdmin) {
+      const parent = parentId === null ? null : await ctx.repos.categories.byId(parentId);
+      await ctx.editMessageText("Sent for review.", { reply_markup: undefined });
+      await ctx.answerCallbackQuery();
+      await submitForReview(ctx, "add_category", { name: flow.name, parentId, parentName: parent?.name ?? null });
+      return;
+    }
+    const created = await ctx.repos.categories.create(parentId, flow.name);
     await ctx.editMessageText(`Created category "${created.name}" (#${created.id}).`, { reply_markup: undefined });
     await ctx.answerCallbackQuery();
     return;
@@ -24,9 +32,24 @@ async function handlePickC(ctx: AppContext, catId: number): Promise<void> {
       await ctx.answerCallbackQuery({ text: "That category no longer exists.", show_alert: true });
       return;
     }
+    ctx.session.flow = undefined;
+
+    if (!ctx.isAdmin) {
+      const newParent = parentId === null ? null : await ctx.repos.categories.byId(parentId);
+      await ctx.editMessageText("Sent for review.", { reply_markup: undefined });
+      await ctx.answerCallbackQuery();
+      await submitForReview(ctx, "edit_category", {
+        action: "move",
+        categoryId: category.id,
+        categoryName: category.name,
+        newParentId: parentId,
+        newParentName: newParent?.name ?? null,
+      });
+      return;
+    }
+
     try {
       await ctx.repos.categories.reparent(category, parentId);
-      ctx.session.flow = undefined;
       await ctx.editMessageText(`Moved "${category.name}".`, { reply_markup: undefined });
     } catch (err) {
       await ctx.editMessageText(`Couldn't move it: ${(err as Error).message}`, { reply_markup: undefined });
@@ -74,8 +97,16 @@ export async function handlePick(ctx: AppContext, cb: Extract<Callback, { op: "p
       await ctx.answerCallbackQuery({ text: "Nothing pending — start again with /addfact.", show_alert: true });
       return;
     }
-    const { fact, duplicate } = await ctx.repos.facts.create(category.id, flow.text, flow.source, ctx.from!.id);
     ctx.session.flow = undefined;
+
+    if (!ctx.isAdmin) {
+      await ctx.editMessageText("Sent for review.", { reply_markup: undefined });
+      await ctx.answerCallbackQuery();
+      await submitForReview(ctx, "add_fact", { text: flow.text, categoryId: category.id, categoryName: category.name });
+      return;
+    }
+
+    const { fact, duplicate } = await ctx.repos.facts.create(category.id, flow.text, flow.source, ctx.from!.id);
     await ctx.editMessageText(
       duplicate
         ? `Already have that fact (#${fact.id}) in "${category.name}".`

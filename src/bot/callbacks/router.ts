@@ -6,6 +6,7 @@ import { handleSearchPage } from "./search";
 import { handlePick } from "./pick";
 import { handleNext, handleRandom } from "./next";
 import { handleEditAction } from "./editcat";
+import { handleReviewDecision } from "./review";
 
 export function installCallbackRouter(bot: Bot<AppContext>): void {
   bot.on("callback_query:data", async (ctx) => {
@@ -30,6 +31,8 @@ export function installCallbackRouter(bot: Bot<AppContext>): void {
         return handleRandom(ctx, cb);
       case "e":
         return handleEditAction(ctx, cb);
+      case "v":
+        return handleReviewDecision(ctx, cb);
       case "h":
         return ctx.answerCallbackQuery();
       case "x":

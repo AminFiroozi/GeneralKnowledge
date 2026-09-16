@@ -1,6 +1,7 @@
 import type { AppContext } from "./context";
 import { nextFact } from "../services/feed";
 import type { Category } from "../domain/types";
+import { escapeHtml } from "./html";
 
 /** Sends the next fact for `category` (null = whole tree, "surprise me")
  * to the user. No per-message keyboard — the persistent bottom menu
@@ -31,8 +32,4 @@ export async function deliverFact(ctx: AppContext, category: Category | null): P
   await ctx.reply(`${label}${escapeHtml(result.fact.body)}`, { parse_mode: "HTML" });
 
   ctx.waitUntil(ctx.repos.seen.markSeen(userId, result.fact.id));
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
