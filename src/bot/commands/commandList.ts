@@ -12,6 +12,7 @@ export const PUBLIC_COMMANDS: CommandDescriptor[] = [
   { command: "start", description: "Start the feed" },
   { command: "feed", description: "Get another fact" },
   { command: "next", description: "Same as /feed" },
+  { command: "surprise", description: "A fact from any category" },
   { command: "read", description: "Browse categories" },
   { command: "browse", description: "Same as /read" },
   { command: "search", description: "Search categories by name" },
