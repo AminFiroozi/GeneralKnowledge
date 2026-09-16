@@ -5,6 +5,7 @@ import { SeenRepo } from "./seen.repo";
 import { UsersRepo } from "./users.repo";
 import { StateRepo } from "./state.repo";
 import { TokensRepo } from "./tokens.repo";
+import { PendingChangesRepo } from "./pendingChanges.repo";
 
 export interface Repos {
   categories: CategoriesRepo;
@@ -13,6 +14,7 @@ export interface Repos {
   users: UsersRepo;
   state: StateRepo;
   tokens: TokensRepo;
+  pendingChanges: PendingChangesRepo;
 }
 
 export function makeRepos(d1: D1Database): Repos {
@@ -24,5 +26,6 @@ export function makeRepos(d1: D1Database): Repos {
     users: new UsersRepo(db),
     state: new StateRepo(db),
     tokens: new TokensRepo(db),
+    pendingChanges: new PendingChangesRepo(db),
   };
 }

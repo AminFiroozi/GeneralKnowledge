@@ -1,9 +1,10 @@
-import type { Callback, EditAction, Purpose } from "./types";
+import type { Callback, EditAction, Purpose, ReviewDecision } from "./types";
 
 export const MAX_CALLBACK_BYTES = 64; // Telegram's callback_data hard limit
 const VERSION = "1";
 const PURPOSES = new Set<Purpose>(["r", "a", "d", "c", "m", "e"]);
 const EDIT_ACTIONS = new Set<EditAction>(["n", "m"]);
+const REVIEW_DECISIONS = new Set<ReviewDecision>(["a", "r"]);
 const TOKEN_RE = /^[0-9a-z]{1,16}$/;
 
 function isPurpose(x: string): x is Purpose {
@@ -12,6 +13,10 @@ function isPurpose(x: string): x is Purpose {
 
 function isEditAction(x: string): x is EditAction {
   return EDIT_ACTIONS.has(x as EditAction);
+}
+
+function isReviewDecision(x: string): x is ReviewDecision {
+  return REVIEW_DECISIONS.has(x as ReviewDecision);
 }
 
 function parseIntStrict(x: string | undefined): number | null {
@@ -55,6 +60,9 @@ export function encode(cb: Callback): string {
       break;
     case "e":
       s = `${VERSION}:e:${cb.action}:${cb.catId}`;
+      break;
+    case "v":
+      s = `${VERSION}:v:${cb.decision}:${cb.pendingId}`;
       break;
   }
   const bytes = new TextEncoder().encode(s).length;
@@ -113,6 +121,12 @@ export function decode(raw: string): Callback | null {
       const catId = parseIntStrict(parts[3]);
       if (!action || !isEditAction(action) || catId === null) return null;
       return { op: "e", action, catId };
+    }
+    case "v": {
+      const decision = parts[2];
+      const pendingId = parseIntStrict(parts[3]);
+      if (!decision || !isReviewDecision(decision) || pendingId === null) return null;
+      return { op: "v", decision, pendingId };
     }
     default:
       return null;

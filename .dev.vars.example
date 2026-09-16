@@ -1,3 +1,7 @@
 BOT_TOKEN=123456:dev-bot-token-from-botfather
 WEBHOOK_SECRET=dev-secret-any-random-string
 ADMIN_IDS=11111111,22222222
+# Chat id of a group/channel the bot is a member of, for non-admin add/edit
+# review requests. Leave empty to disable review (submissions get a
+# friendly "not configured" reply instead of erroring).
+ADMIN_CHANNEL_ID=

@@ -19,11 +19,12 @@ export async function addCategoryCommand(ctx: AppContext): Promise<void> {
   await ctx.reply("Send the new category's name.");
 }
 
-/** Registered on `message:text`; only acts when an admin is mid-/addcat
- * waiting for the name step, otherwise falls through. */
+/** Registered on `message:text`; only acts while mid-/addcat waiting for
+ * the name step, otherwise falls through. Open to non-admins too — the
+ * actual create-vs-review branch happens once a parent is picked. */
 export async function addCategoryTextHandler(ctx: AppContext, next: () => Promise<void>): Promise<void> {
   const flow = ctx.session.flow;
-  if (!ctx.isAdmin || !flow || flow.kind !== "addcat" || flow.step !== "await_name") {
+  if (!flow || flow.kind !== "addcat" || flow.step !== "await_name") {
     return next();
   }
   const name = ctx.message?.text?.trim();
