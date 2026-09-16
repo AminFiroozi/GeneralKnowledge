@@ -8,7 +8,9 @@ export type Flow =
   | { kind: "addcat"; step: "await_name" }
   | { kind: "addcat"; step: "await_parent"; name: string }
   | { kind: "movecat"; step: "await_source" }
-  | { kind: "movecat"; step: "await_parent"; categoryId: number };
+  | { kind: "movecat"; step: "await_parent"; categoryId: number }
+  | { kind: "editcat"; step: "await_target" }
+  | { kind: "editcat"; step: "await_name"; categoryId: number };
 
 export interface SessionData {
   flow?: Flow;

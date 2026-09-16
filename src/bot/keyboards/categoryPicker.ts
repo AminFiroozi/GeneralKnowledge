@@ -35,7 +35,9 @@ export function browseKeyboard(view: BrowseView, purpose: Purpose): InlineKeyboa
         ? `✅ Make it a child of "${view.current.name}"`
         : purpose === "m"
           ? `✅ Move "${view.current.name}"`
-          : `✅ Use "${view.current.name}" (incl. subtopics)`;
+          : purpose === "e"
+            ? `✏️ Edit "${view.current.name}"`
+            : `✅ Use "${view.current.name}" (incl. subtopics)`;
     kb.row().text(pickLabel, encode({ op: "p", purpose, catId: view.current.id }));
     kb.row().text("⬆️ Up", encode({ op: "u", purpose, catId: view.current.id, page: 0 }));
   } else if (purpose === "c") {

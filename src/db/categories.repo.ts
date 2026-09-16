@@ -52,6 +52,21 @@ export class CategoriesRepo {
     return row;
   }
 
+  /** Renames a category's display name only. `slug` is left untouched —
+   * it's the stable identifier /import matches on, so it shouldn't shift
+   * just because a display label changed. */
+  async rename(id: number, name: string): Promise<Category> {
+    await this.db.run(
+      `UPDATE categories SET name = ?1, name_norm = ?2 WHERE id = ?3`,
+      name,
+      normalizeName(name),
+      id,
+    );
+    const updated = await this.byId(id);
+    if (!updated) throw new Error(`category ${id} not found`);
+    return updated;
+  }
+
   /** Top-level categories (no parent), alphabetical, paginated. */
   async topLevel(page: number, pageSize = CATEGORY_PAGE_SIZE): Promise<Page<Category>> {
     const rows = await this.db.many<CategoryRow>(

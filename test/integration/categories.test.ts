@@ -68,4 +68,18 @@ describe("category creation", () => {
     expect(child.path).toBe(`${parent.path}${child.id}/`);
     expect(child.depth).toBe(parent.depth + 1);
   });
+
+  it("rename updates name/name_norm but leaves slug, path, and parent untouched", async () => {
+    const db = new Db(env.DB);
+    const categories = new CategoriesRepo(db);
+    const original = await categories.create(null, "Old Name " + Math.random());
+
+    const renamed = await categories.rename(original.id, "Brand New Name");
+
+    expect(renamed.name).toBe("Brand New Name");
+    expect(renamed.nameNorm).toBe("brand new name");
+    expect(renamed.slug).toBe(original.slug);
+    expect(renamed.path).toBe(original.path);
+    expect(renamed.parentId).toBe(original.parentId);
+  });
 });

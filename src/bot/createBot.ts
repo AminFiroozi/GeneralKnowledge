@@ -22,6 +22,7 @@ import { resetCommand } from "./commands/resetSeen";
 import { addFactCommand, addFactTextHandler } from "./commands/admin/addfact";
 import { addCategoryCommand, addCategoryTextHandler } from "./commands/admin/addcategory";
 import { moveCategoryCommand } from "./commands/admin/movecategory";
+import { editCategoryCommand, editCategoryTextHandler } from "./commands/admin/editcategory";
 import { delFactCommand } from "./commands/admin/delfact";
 import { statsCommand } from "./commands/admin/stats";
 import { importCommand } from "./commands/admin/import";
@@ -57,12 +58,13 @@ export function createBot(env: Env, execCtx: ExecutionContext): Bot<AppContext> 
   bot.command("addfact", adminOnly, addFactCommand);
   bot.command("addcat", adminOnly, addCategoryCommand);
   bot.command("movecat", adminOnly, moveCategoryCommand);
+  bot.command("editcat", adminOnly, editCategoryCommand);
   bot.command("delfact", adminOnly, delFactCommand);
   bot.command("stats", adminOnly, statsCommand);
   bot.command("import", adminOnly, importCommand);
 
   // Multi-step admin flows continue on the next plain-text message.
-  bot.on("message:text", addFactTextHandler, addCategoryTextHandler);
+  bot.on("message:text", addFactTextHandler, addCategoryTextHandler, editCategoryTextHandler);
 
   installCallbackRouter(bot);
   installErrorHandler(bot);

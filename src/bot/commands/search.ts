@@ -1,6 +1,15 @@
 import type { AppContext } from "../context";
+import type { Purpose } from "../../callback/types";
 import { startSearch, searchPage } from "../../services/categoryTree";
 import { searchKeyboard } from "../keyboards/categoryPicker";
+
+function purposeForCurrentFlow(ctx: AppContext): Purpose {
+  const flow = ctx.session.flow;
+  if (flow?.kind === "addfact" && flow.step === "await_category") return "a";
+  if (flow?.kind === "movecat" && flow.step === "await_source") return "m";
+  if (flow?.kind === "editcat" && flow.step === "await_target") return "e";
+  return "r";
+}
 
 export async function searchCommand(ctx: AppContext): Promise<void> {
   const query = typeof ctx.match === "string" ? ctx.match.trim() : "";
@@ -8,10 +17,9 @@ export async function searchCommand(ctx: AppContext): Promise<void> {
     await ctx.reply("Usage: /search <text> — e.g. /search physics");
     return;
   }
-  // Mid-/addfact, category search should assign the pending fact rather
-  // than switch what the user is reading.
-  const flow = ctx.session.flow;
-  const purpose = flow?.kind === "addfact" && flow.step === "await_category" ? "a" : "r";
+  // Mid-flow, category search should feed that flow (assign a fact,
+  // pick a category to move/edit) rather than switch what's being read.
+  const purpose = purposeForCurrentFlow(ctx);
 
   const token = await startSearch(ctx.repos, ctx.from!.id, query);
   const view = await searchPage(ctx.repos, token, 0);

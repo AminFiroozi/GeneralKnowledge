@@ -1,12 +1,17 @@
-import type { Callback, Purpose } from "./types";
+import type { Callback, EditAction, Purpose } from "./types";
 
 export const MAX_CALLBACK_BYTES = 64; // Telegram's callback_data hard limit
 const VERSION = "1";
-const PURPOSES = new Set<Purpose>(["r", "a", "d", "c", "m"]);
+const PURPOSES = new Set<Purpose>(["r", "a", "d", "c", "m", "e"]);
+const EDIT_ACTIONS = new Set<EditAction>(["n", "m"]);
 const TOKEN_RE = /^[0-9a-z]{1,16}$/;
 
 function isPurpose(x: string): x is Purpose {
   return PURPOSES.has(x as Purpose);
+}
+
+function isEditAction(x: string): x is EditAction {
+  return EDIT_ACTIONS.has(x as EditAction);
 }
 
 function parseIntStrict(x: string | undefined): number | null {
@@ -47,6 +52,9 @@ export function encode(cb: Callback): string {
       break;
     case "z":
       s = `${VERSION}:z`;
+      break;
+    case "e":
+      s = `${VERSION}:e:${cb.action}:${cb.catId}`;
       break;
   }
   const bytes = new TextEncoder().encode(s).length;
@@ -100,6 +108,12 @@ export function decode(raw: string): Callback | null {
       return { op: "h" };
     case "z":
       return { op: "z" };
+    case "e": {
+      const action = parts[2];
+      const catId = parseIntStrict(parts[3]);
+      if (!action || !isEditAction(action) || catId === null) return null;
+      return { op: "e", action, catId };
+    }
     default:
       return null;
   }

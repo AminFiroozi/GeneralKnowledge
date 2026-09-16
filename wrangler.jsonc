@@ -11,11 +11,11 @@
     {
       "binding": "DB",
       "database_name": "general-knowledge",
-      "database_id": "REPLACE_WITH_WRANGLER_D1_CREATE_OUTPUT",
+      "database_id": "56dcbd88-45b6-47ea-ba4c-5e694224c4a8",
       "migrations_dir": "migrations"
     }
   ],
   "vars": {
-    "BOT_INFO": "{\"id\":0,\"is_bot\":true,\"first_name\":\"REPLACE\",\"username\":\"REPLACE_bot\",\"can_join_groups\":true,\"can_read_all_group_messages\":false,\"supports_inline_queries\":false}"
+    "BOT_INFO": "{\"id\":8835770256,\"is_bot\":true,\"first_name\":\"General Knowledge\",\"username\":\"GenowledgeBot\",\"can_join_groups\":true,\"can_read_all_group_messages\":false,\"supports_inline_queries\":false}"
   }
 }

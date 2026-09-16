@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { encode, decode, MAX_CALLBACK_BYTES } from "../../src/callback/codec";
-import type { Callback, Purpose } from "../../src/callback/types";
+import type { Callback, EditAction, Purpose } from "../../src/callback/types";
 
-const PURPOSES: Purpose[] = ["r", "a", "d", "c", "m"];
+const PURPOSES: Purpose[] = ["r", "a", "d", "c", "m", "e"];
+const EDIT_ACTIONS: EditAction[] = ["n", "m"];
 const IDS = [0, 1, 42, 999999999];
 const PAGES = [0, 1, 999];
 
@@ -21,6 +22,9 @@ function allCallbacks(): Callback[] {
   for (const catId of IDS) {
     out.push({ op: "n", catId });
     out.push({ op: "r", catId });
+    for (const action of EDIT_ACTIONS) {
+      out.push({ op: "e", action, catId });
+    }
   }
   out.push({ op: "x" }, { op: "h" }, { op: "z" });
   return out;

@@ -3,6 +3,7 @@ import type { Callback } from "../../callback/types";
 import { deliverFact } from "../deliverFact";
 import { browse } from "../../services/categoryTree";
 import { browseKeyboard } from "../keyboards/categoryPicker";
+import { showEditMenu } from "./editcat";
 
 async function handlePickC(ctx: AppContext, catId: number): Promise<void> {
   const flow = ctx.session.flow;
@@ -52,6 +53,7 @@ async function handlePickM(ctx: AppContext, catId: number): Promise<void> {
 export async function handlePick(ctx: AppContext, cb: Extract<Callback, { op: "p" }>): Promise<void> {
   if (cb.purpose === "c") return handlePickC(ctx, cb.catId);
   if (cb.purpose === "m") return handlePickM(ctx, cb.catId);
+  if (cb.purpose === "e") return showEditMenu(ctx, cb.catId);
 
   const category = await ctx.repos.categories.byId(cb.catId);
   if (!category) {

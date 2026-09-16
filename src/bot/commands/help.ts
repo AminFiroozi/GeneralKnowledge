@@ -14,7 +14,8 @@ const ADMIN_HELP = `
 <b>Admin</b>
 /addfact — add a fact
 /addcat &lt;name&gt; — add a category
-/movecat — move a category to a new parent
+/movecat — change a category's parent
+/editcat — rename a category or change its parent
 /delfact &lt;id&gt; — hide a fact
 /stats — bot-wide counts
 /import — reply to a .jsonl file to bulk-import facts`;
