@@ -1,0 +1,74 @@
+import { Bot, type BotConfig } from "grammy";
+import type { UserFromGetMe } from "grammy/types";
+import { parseAdminIds } from "../env";
+import type { AppContext } from "./context";
+import { depsMiddleware } from "./middleware/deps";
+import { sessionMiddleware } from "./middleware/session";
+import { ensureUser } from "./middleware/ensureUser";
+import { adminOnly } from "./middleware/adminOnly";
+import { installErrorHandler } from "./middleware/errors";
+import { installCallbackRouter } from "./callbacks/router";
+
+import { startCommand } from "./commands/start";
+import { helpCommand } from "./commands/help";
+import { feedCommand } from "./commands/feed";
+import { readCommand } from "./commands/read";
+import { browseCommand } from "./commands/browse";
+import { searchCommand } from "./commands/search";
+import { setDefaultCommand } from "./commands/setdefault";
+import { meCommand } from "./commands/me";
+import { resetCommand } from "./commands/resetSeen";
+
+import { addFactCommand, addFactTextHandler } from "./commands/admin/addfact";
+import { addCategoryCommand, addCategoryTextHandler } from "./commands/admin/addcategory";
+import { moveCategoryCommand } from "./commands/admin/movecategory";
+import { delFactCommand } from "./commands/admin/delfact";
+import { statsCommand } from "./commands/admin/stats";
+import { importCommand } from "./commands/admin/import";
+
+import { makeRepos } from "../db/repos";
+import { StateRepo } from "../db/state.repo";
+import { Db } from "../db/client";
+
+export function createBot(env: Env, execCtx: ExecutionContext): Bot<AppContext> {
+  const botInfo = JSON.parse(env.BOT_INFO) as UserFromGetMe;
+  const stateRepo = new StateRepo(new Db(env.DB));
+  const adminIds = parseAdminIds(env.ADMIN_IDS);
+
+  const config: BotConfig<AppContext> = { botInfo };
+  const bot = new Bot<AppContext>(env.BOT_TOKEN, config);
+
+  bot.use(sessionMiddleware(stateRepo));
+  bot.use(depsMiddleware(env, adminIds, execCtx));
+  bot.use(ensureUser);
+
+  // Public commands
+  bot.command("start", startCommand);
+  bot.command("help", helpCommand);
+  bot.command(["feed", "next"], feedCommand);
+  bot.command("read", readCommand);
+  bot.command("browse", browseCommand);
+  bot.command("search", searchCommand);
+  bot.command("setdefault", setDefaultCommand);
+  bot.command("me", meCommand);
+  bot.command("reset", resetCommand);
+
+  // Admin commands
+  bot.command("addfact", adminOnly, addFactCommand);
+  bot.command("addcat", adminOnly, addCategoryCommand);
+  bot.command("movecat", adminOnly, moveCategoryCommand);
+  bot.command("delfact", adminOnly, delFactCommand);
+  bot.command("stats", adminOnly, statsCommand);
+  bot.command("import", adminOnly, importCommand);
+
+  // Multi-step admin flows continue on the next plain-text message.
+  bot.on("message:text", addFactTextHandler, addCategoryTextHandler);
+
+  installCallbackRouter(bot);
+  installErrorHandler(bot);
+
+  return bot;
+}
+
+// Re-exported for scripts/tests that need repos without a full bot (e.g. seeding checks).
+export { makeRepos };
