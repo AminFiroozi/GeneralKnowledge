@@ -18,7 +18,11 @@ Built on Cloudflare Workers + D1, using [grammY](https://grammy.dev).
 - **Search or browse**: `/search <text>` for paginated, ranked results, or
   `/read` to browse from the top level down — both via inline keyboards.
 - **Admin content management**: `/addfact`, `/addcat`, `/movecat`,
-  `/delfact`, `/stats`, `/import` (bulk JSONL), gated by Telegram user ID.
+  `/editcat`, `/delfact`, `/stats`, `/import` (bulk JSONL), gated by
+  Telegram user ID.
+- **Native command menu**: the "/" menu in Telegram shows the public
+  command list to everyone, and admins additionally see the admin
+  commands in their own chat (via `setMyCommands` scopes).
 
 ## Stack
 
@@ -54,6 +58,14 @@ npx wrangler secret put WEBHOOK_SECRET     # openssl rand -hex 32
 npx wrangler secret put ADMIN_IDS          # comma-separated Telegram user IDs
 npm run deploy
 curl -X POST https://<your-worker>.workers.dev/admin/set-webhook \
+  -H "x-admin-secret: $WEBHOOK_SECRET"
+```
+
+`/admin/set-webhook` also (re-)registers the command menu. To update the
+menu alone after adding/renaming a command, without touching the webhook:
+
+```bash
+curl -X POST https://<your-worker>.workers.dev/admin/set-commands \
   -H "x-admin-secret: $WEBHOOK_SECRET"
 ```
 
