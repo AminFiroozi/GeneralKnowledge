@@ -1,6 +1,12 @@
 import { webhookCallback } from "grammy";
 import { createBot } from "./bot/createBot";
+import { registerBotCommands } from "./bot/commandsSetup";
+import { parseAdminIds } from "./env";
 // `Env` below is ambient/global (see src/env.ts), no import needed.
+
+function isAuthorizedAdmin(request: Request, env: Env): boolean {
+  return request.headers.get("x-admin-secret") === env.WEBHOOK_SECRET;
+}
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -16,9 +22,8 @@ export default {
     }
 
     if (url.pathname === "/admin/set-webhook" && request.method === "POST") {
-      if (request.headers.get("x-admin-secret") !== env.WEBHOOK_SECRET) {
-        return new Response("forbidden", { status: 403 });
-      }
+      if (!isAuthorizedAdmin(request, env)) return new Response("forbidden", { status: 403 });
+
       const target = `${url.origin}/webhook`;
       const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/setWebhook`, {
         method: "POST",
@@ -30,7 +35,25 @@ export default {
           drop_pending_updates: true,
         }),
       });
-      return new Response(await res.text(), { status: res.status, headers: { "content-type": "application/json" } });
+      const webhookResult = await res.json();
+
+      // Also (re-)register the "/" command menu — cheap, and doing it
+      // here means a fresh deploy is fully set up in one call.
+      const bot = createBot(env, ctx);
+      await registerBotCommands(bot, parseAdminIds(env.ADMIN_IDS));
+
+      return new Response(JSON.stringify({ webhook: webhookResult, commands: "registered" }), {
+        status: res.status,
+        headers: { "content-type": "application/json" },
+      });
+    }
+
+    if (url.pathname === "/admin/set-commands" && request.method === "POST") {
+      if (!isAuthorizedAdmin(request, env)) return new Response("forbidden", { status: 403 });
+
+      const bot = createBot(env, ctx);
+      await registerBotCommands(bot, parseAdminIds(env.ADMIN_IDS));
+      return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
     }
 
     return new Response("ok");
