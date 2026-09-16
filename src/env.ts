@@ -7,12 +7,16 @@ declare global {
     BOT_TOKEN: string;
     WEBHOOK_SECRET: string;
     ADMIN_IDS: string;
+    /** Telegram chat id (group/channel) where non-admin add/edit requests
+     * are posted for approval. Empty string = not configured yet. */
+    ADMIN_CHANNEL_ID: string;
   }
   namespace Cloudflare {
     interface Env {
       BOT_TOKEN: string;
       WEBHOOK_SECRET: string;
       ADMIN_IDS: string;
+      ADMIN_CHANNEL_ID: string;
     }
   }
 }

@@ -8,11 +8,12 @@ export async function addFactCommand(ctx: AppContext): Promise<void> {
   await ctx.reply("Send the fact's text.");
 }
 
-/** Registered on `message:text`; only acts when an admin has an active
- * /addfact flow waiting for the text step, otherwise falls through. */
+/** Registered on `message:text`; only acts while an /addfact flow is
+ * waiting for the text step, otherwise falls through. Open to non-admins
+ * too — the create-vs-review branch happens once a category is picked. */
 export async function addFactTextHandler(ctx: AppContext, next: () => Promise<void>): Promise<void> {
   const flow = ctx.session.flow;
-  if (!ctx.isAdmin || !flow || flow.kind !== "addfact" || flow.step !== "await_text") {
+  if (!flow || flow.kind !== "addfact" || flow.step !== "await_text") {
     return next();
   }
   const text = ctx.message?.text?.trim();

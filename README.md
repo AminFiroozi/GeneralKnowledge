@@ -22,9 +22,11 @@ Built on Cloudflare Workers + D1, using [grammY](https://grammy.dev).
   descendants.
 - **Search or browse**: `/search <text>` for paginated, ranked results, or
   `/read` to browse from the top level down — both via inline keyboards.
-- **Admin content management**: `/addfact`, `/addcat`, `/movecat`,
-  `/editcat`, `/delfact`, `/stats`, `/import` (bulk JSONL), gated by
-  Telegram user ID.
+- **Content management**: `/addfact`, `/addcat`, `/editcat` are open to
+  everyone — an admin's change applies immediately, anyone else's gets
+  posted to the configured admin channel for a ✅/❌ decision (see
+  `ADMIN_CHANNEL_ID` below). `/movecat`, `/delfact`, `/stats`, `/import`
+  (bulk JSONL), `/pending` stay admin-only, gated by Telegram user ID.
 - **Native command menu**: the "/" menu in Telegram shows the public
   command list to everyone, and admins additionally see the admin
   commands in their own chat (via `setMyCommands` scopes).
@@ -61,6 +63,7 @@ npm run db:migrate:remote
 npx wrangler secret put BOT_TOKEN
 npx wrangler secret put WEBHOOK_SECRET     # openssl rand -hex 32
 npx wrangler secret put ADMIN_IDS          # comma-separated Telegram user IDs
+npx wrangler secret put ADMIN_CHANNEL_ID   # chat id of a group/channel the bot is in — see below
 npm run deploy
 curl -X POST https://<your-worker>.workers.dev/admin/set-webhook \
   -H "x-admin-secret: $WEBHOOK_SECRET"
@@ -73,6 +76,20 @@ menu alone after adding/renaming a command, without touching the webhook:
 curl -X POST https://<your-worker>.workers.dev/admin/set-commands \
   -H "x-admin-secret: $WEBHOOK_SECRET"
 ```
+
+### Setting up the admin review channel
+
+1. Create a Telegram group or channel, add the bot to it, and give it
+   permission to post (and, for a channel, make it an admin so it can
+   send messages).
+2. Get the chat id — the easiest way is to send any message in it, then
+   check `getUpdates` or forward that message to
+   [@userinfobot](https://t.me/userinfobot); group/channel ids are
+   negative (e.g. `-1001234567890`).
+3. `npx wrangler secret put ADMIN_CHANNEL_ID` with that value.
+
+Without this configured, a non-admin's `/addfact`/`/addcat`/`/editcat`
+just gets a "review isn't set up yet" reply instead of erroring.
 
 ## Tests
 
