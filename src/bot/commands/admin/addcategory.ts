@@ -14,6 +14,7 @@ export async function addCategoryCommand(ctx: AppContext): Promise<void> {
     await promptForParent(ctx, name);
     return;
   }
+  ctx.session.awaitingSearchQuery = false; // a stale 🔍 Search prompt shouldn't hijack the name step below
   ctx.session.flow = { kind: "addcat", step: "await_name" };
   await ctx.reply("Send the new category's name.");
 }

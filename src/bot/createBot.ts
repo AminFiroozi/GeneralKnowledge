@@ -11,7 +11,7 @@ import { installCallbackRouter } from "./callbacks/router";
 
 import { startCommand } from "./commands/start";
 import { helpCommand } from "./commands/help";
-import { feedCommand } from "./commands/feed";
+import { feedCommand, surpriseCommand } from "./commands/feed";
 import { readCommand } from "./commands/read";
 import { browseCommand } from "./commands/browse";
 import { searchCommand } from "./commands/search";
@@ -26,6 +26,19 @@ import { editCategoryCommand, editCategoryTextHandler } from "./commands/admin/e
 import { delFactCommand } from "./commands/admin/delfact";
 import { statsCommand } from "./commands/admin/stats";
 import { importCommand } from "./commands/admin/import";
+
+import { MAIN_MENU } from "./keyboards/mainMenu";
+import {
+  onMenuNext,
+  onMenuSurprise,
+  onMenuBrowse,
+  onMenuSearchPrompt,
+  onMenuDefaultTopic,
+  onMenuMe,
+  onMenuReset,
+  onMenuHelp,
+  searchPromptTextHandler,
+} from "./commands/mainMenuActions";
 
 import { makeRepos } from "../db/repos";
 import { StateRepo } from "../db/state.repo";
@@ -47,6 +60,7 @@ export function createBot(env: Env, execCtx: ExecutionContext): Bot<AppContext> 
   bot.command("start", startCommand);
   bot.command("help", helpCommand);
   bot.command(["feed", "next"], feedCommand);
+  bot.command("surprise", surpriseCommand);
   bot.command("read", readCommand);
   bot.command("browse", browseCommand);
   bot.command("search", searchCommand);
@@ -63,8 +77,26 @@ export function createBot(env: Env, execCtx: ExecutionContext): Bot<AppContext> 
   bot.command("stats", adminOnly, statsCommand);
   bot.command("import", adminOnly, importCommand);
 
-  // Multi-step admin flows continue on the next plain-text message.
-  bot.on("message:text", addFactTextHandler, addCategoryTextHandler, editCategoryTextHandler);
+  // Persistent reply-keyboard taps (mainMenu.ts). Registered before the
+  // flow-continuation handlers below: a menu tap always supersedes a
+  // pending admin flow rather than being swallowed as its text input.
+  bot.hears(MAIN_MENU.next, onMenuNext);
+  bot.hears(MAIN_MENU.surprise, onMenuSurprise);
+  bot.hears(MAIN_MENU.search, onMenuSearchPrompt);
+  bot.hears(MAIN_MENU.browse, onMenuBrowse);
+  bot.hears(MAIN_MENU.defaultTopic, onMenuDefaultTopic);
+  bot.hears(MAIN_MENU.me, onMenuMe);
+  bot.hears(MAIN_MENU.reset, onMenuReset);
+  bot.hears(MAIN_MENU.help, onMenuHelp);
+
+  // Multi-step flows continue on the next plain-text message.
+  bot.on(
+    "message:text",
+    searchPromptTextHandler,
+    addFactTextHandler,
+    addCategoryTextHandler,
+    editCategoryTextHandler,
+  );
 
   installCallbackRouter(bot);
   installErrorHandler(bot);
